@@ -1,8 +1,8 @@
 from fastapi import FastAPI
-from app.routers.compare_router import router as compare_router
-from app.routers.indent_router import router as indent_router
-from app.routers.syntax_router import router as syntax_router
-from app.routers.ai_router import router as ai_router
+from .routers.compare_router import router as compare_router
+from .routers.indent_router import router as indent_router
+from .routers.syntax_router import router as syntax_router
+from .routers.ai_router import router as ai_router
 
 app = FastAPI(title="Codepad Backend", version="1.0.0")
 
