@@ -1,0 +1,107 @@
+# ----------------------------
+# GLOBAL
+# ----------------------------
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# Environment files
+.env
+.env*.local
+
+# Editor
+.vscode/
+*.swp
+.idea/
+
+# ----------------------------
+# NEXT.JS FRONTEND
+# ----------------------------
+
+# Next.js build outputs
+.next/
+out/
+dist/
+.vercel/
+.cache/
+
+# Node modules
+node_modules/
+
+# Next.js type build artifacts
+*.tsbuildinfo
+
+# Turbo repo files (if using Next + Turbo)
+.turbo/
+
+# ----------------------------
+# BACKEND – PYTHON (FastAPI / Django / Flask)
+# ----------------------------
+
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pdb
+*.pyo
+.env/
+.venv/
+venv/
+env/
+ENV/
+
+# Pytest
+.pytest_cache/
+
+# Python build
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+wheels/
+*.egg-info/
+.installed.cfg
+
+# ----------------------------
+# BACKEND – NODE.JS (Express / NestJS)
+# ----------------------------
+
+backend/node_modules/
+backend/dist/
+backend/build/
+backend/logs/
+backend/*.log
+
+# ----------------------------
+# Git / Integration
+# ----------------------------
+
+# Ignore local Git LFS files
+*.lfs
+
+# Ignore local secrets
+secrets/
+credentials/
+*.pem
+*.key
+
+# ----------------------------
+# Workspace cache
+# ----------------------------
+
+.npm/
+.yarn/
+.pnpm-store/
+.cache/
+tmp/
+temp/
