@@ -4,6 +4,8 @@ import { useState } from 'react';
 import dynamic from 'next/dynamic';
 import * as Tabs from '@radix-ui/react-tabs';
 import axios from 'axios';
+import ReactMarkdown from 'react-markdown';
+import Logo from '@/components/Logo';
 
 // Dynamically import the Monaco Editor to avoid SSR issues
 const MonacoEditor = dynamic(
@@ -153,38 +155,147 @@ export default function CodeAnalyzer() {
     }
   };
 
+  // Function to render diff output in a clean format
+  const renderDiffOutput = (diffData: any) => {
+    if (!diffData) return null;
+
+    if (diffData.diff && Array.isArray(diffData.diff)) {
+      return (
+        <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow overflow-auto max-h-96">
+          <div className="font-mono text-sm">
+            {diffData.diff.map((line: string, index: number) => {
+              let lineClass = 'text-gray-800 dark:text-gray-200';
+              if (line.startsWith('+')) {
+                lineClass = 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200';
+              } else if (line.startsWith('-')) {
+                lineClass = 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200';
+              } else if (line.startsWith('@@')) {
+                lineClass = 'text-blue-600 dark:text-blue-400 font-medium';
+              }
+
+              return (
+                <div key={index} className={`py-1 px-2 ${lineClass} whitespace-pre`}>
+                  {line}
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+            <div className="grid grid-cols-3 gap-4 text-center">
+              <div className="p-2 bg-blue-50 dark:bg-blue-900/20 rounded">
+                <div className="text-sm text-gray-500 dark:text-gray-400">Additions</div>
+                <div className="text-lg font-semibold text-green-600 dark:text-green-400">+{diffData.additions_count || 0}</div>
+              </div>
+              <div className="p-2 bg-blue-50 dark:bg-blue-900/20 rounded">
+                <div className="text-sm text-gray-500 dark:text-gray-400">Deletions</div>
+                <div className="text-lg font-semibold text-red-600 dark:text-red-400">-{diffData.deletions_count || 0}</div>
+              </div>
+              <div className="p-2 bg-blue-50 dark:bg-blue-900/20 rounded">
+                <div className="text-sm text-gray-500 dark:text-gray-400">Total Changes</div>
+                <div className="text-lg font-semibold text-blue-600 dark:text-blue-400">{diffData.total_changes || 0}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+  
+    
+    // Fallback for non-diff results
+    return (
+      <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow overflow-auto max-h-96">
+        <pre className="whitespace-pre-wrap text-gray-900 dark:text-gray-100">
+          {JSON.stringify(diffData, null, 2)}
+        </pre>
+      </div>
+    );
+  };
+
+  // ✅ Paste AI Summary Renderer HERE
+  const renderAISummary = (data: any) => {
+    return (
+      <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow overflow-auto max-h-96">
+        <div className="prose dark:prose-invert max-w-none">
+          <ReactMarkdown>
+            {data.summary || "No summary generated."}
+          </ReactMarkdown>
+        </div>
+
+        {/* Diff Stats */}
+        {data.diff_stats && (
+          <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+            <div className="grid grid-cols-3 gap-4 text-center">
+              <div className="p-2 bg-blue-50 dark:bg-blue-900/20 rounded">
+                <div className="text-sm text-gray-500 dark:text-gray-400">Additions</div>
+                <div className="text-lg font-semibold text-green-600 dark:text-green-400">
+                  +{data.diff_stats.additions}
+                </div>
+              </div>
+
+              <div className="p-2 bg-blue-50 dark:bg-blue-900/20 rounded">
+                <div className="text-sm text-gray-500 dark:text-gray-400">Deletions</div>
+                <div className="text-lg font-semibold text-red-600 dark:text-red-400">
+                  -{data.diff_stats.deletions}
+                </div>
+              </div>
+
+              <div className="p-2 bg-blue-50 dark:bg-blue-900/20 rounded">
+                <div className="text-sm text-gray-500 dark:text-gray-400">Total Changes</div>
+                <div className="text-lg font-semibold text-blue-600 dark:text-blue-400">
+                  {data.diff_stats.total_changes}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6">
       <div className="max-w-7xl mx-auto">
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">Code Analysis Tool</h1>
+        {/* TOP HEADER: Logo + Settings */}
+        <div className="flex items-center justify-between mb-6 px-1">
+          <div className="flex items-center gap-2">
+            <Logo />
+          </div>
+          <button className="p-2 rounded-md text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.72l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.72V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.72l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.72V4a2 2 0 0 0-2-2z" />
+              <circle cx="12" cy="12" r="3" />
+            </svg>
+          </button>
+        </div>
         
-        <Tabs.Root 
-          defaultValue="compare" 
-          className="bg-white rounded-lg shadow overflow-hidden"
+        <Tabs.Root
+          defaultValue="compare"
+          className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden"
           onValueChange={(value) => setActiveTab(value as ActiveTab)}
         >
-          <Tabs.List className="flex border-b border-gray-200">
-            <Tabs.Trigger 
+          <Tabs.List className="flex border-b border-gray-200 dark:border-gray-700">
+            <Tabs.Trigger
               value="compare"
-              className="px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 border-b-2 border-transparent hover:border-gray-300 data-[state=active]:border-blue-500 data-[state=active]:text-blue-600"
+              className="px-4 py-2 text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 border-b-2 border-transparent hover:border-gray-300 data-[state=active]:border-blue-500 data-[state=active]:text-blue-600 dark:data-[state=active]:text-blue-400"
             >
               Compare Code
             </Tabs.Trigger>
-            <Tabs.Trigger 
+            <Tabs.Trigger
               value="indent"
-              className="px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 border-b-2 border-transparent hover:border-gray-300 data-[state=active]:border-blue-500 data-[state=active]:text-blue-600"
+              className="px-4 py-2 text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 border-b-2 border-transparent hover:border-gray-300 data-[state=active]:border-blue-500 data-[state=active]:text-blue-600 dark:data-[state=active]:text-blue-400"
             >
               Indentation Check
             </Tabs.Trigger>
-            <Tabs.Trigger 
+            <Tabs.Trigger
               value="syntax"
-              className="px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 border-b-2 border-transparent hover:border-gray-300 data-[state=active]:border-blue-500 data-[state=active]:text-blue-600"
+              className="px-4 py-2 text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 border-b-2 border-transparent hover:border-gray-300 data-[state=active]:border-blue-500 data-[state=active]:text-blue-600 dark:data-[state=active]:text-blue-400"
             >
               Syntax Validation
             </Tabs.Trigger>
-            <Tabs.Trigger 
+            <Tabs.Trigger
               value="ai"
-              className="px-4 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 border-b-2 border-transparent hover:border-gray-300 data-[state=active]:border-blue-500 data-[state=active]:text-blue-600"
+              className="px-4 py-2 text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 border-b-2 border-transparent hover:border-gray-300 data-[state=active]:border-blue-500 data-[state=active]:text-blue-600 dark:data-[state=active]:text-blue-400"
             >
               AI Summary
             </Tabs.Trigger>
@@ -193,7 +304,7 @@ export default function CodeAnalyzer() {
           <div className="p-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
               <div className="h-96">
-                <h3 className="text-sm font-medium text-gray-700 mb-2">
+                <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   {activeTab === 'compare' ? 'Original Code' : 'Enter Code'}
                 </h3>
                 <MonacoEditor
@@ -214,7 +325,7 @@ export default function CodeAnalyzer() {
 
               {activeTab === 'compare' || activeTab === 'ai' ? (
                 <div className="h-96">
-                  <h3 className="text-sm font-medium text-gray-700 mb-2">Modified Code</h3>
+                  <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Modified Code</h3>
                   <MonacoEditor
                     height="300px"
                     defaultLanguage="javascript"
@@ -243,21 +354,34 @@ export default function CodeAnalyzer() {
               </button>
             </div>
 
-            {(result || error) && (
+            {error ? (
               <div className="mt-6">
-                <h3 className="text-lg font-medium text-gray-900 mb-2">
-                  {error ? 'Error' : 'Result'}
+                <h3 className="text-lg font-medium text-red-600 dark:text-red-400 mb-2">
+                  Error
                 </h3>
-                <div className="bg-gray-50 p-4 rounded-md border border-gray-200 overflow-auto max-h-96">
-                  <pre className="text-sm text-gray-800 whitespace-pre-wrap">
-                    {error ? error : JSON.stringify(result, null, 2)}
+                <div className="bg-red-50 dark:bg-red-900/20 p-4 rounded-md border border-red-200 dark:border-red-800 overflow-auto">
+                  <pre className="text-sm text-red-800 dark:text-red-200 whitespace-pre-wrap">
+                    {error}
                   </pre>
                 </div>
               </div>
-            )}
+            ) : result ? (
+              <div className="mt-6">
+                <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
+                  {activeTab === 'compare' ? 'Code Comparison Results' :
+                   activeTab === 'indent' ? 'Indentation Analysis' :
+                   activeTab === 'syntax' ? 'Syntax Validation' : 'AI Summary'}
+                </h3>
+                {activeTab === 'ai'
+                  ? renderAISummary(result)
+                  : renderDiffOutput(result)
+                }
+              </div>
+            ) : null}
           </div>
         </Tabs.Root>
       </div>
     </div>
   );
 }
+
