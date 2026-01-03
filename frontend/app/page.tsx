@@ -35,7 +35,8 @@ export default function CodeAnalyzer() {
     
     try {
       let response;
-      const baseUrl = 'http://localhost:8000';
+      const baseUrl = process.env.NEXT_PUBLIC_BACKEND_URL!;
+
       
       // Create a properly typed request data object
       const requestData: Record<string, string> = {};
