@@ -7,7 +7,7 @@ from app.services.diff_engine import compare_code
 
 router = APIRouter(prefix="/ai", tags=["AI Summary"])
 
-@router.post("/summary/", response_model=Dict[str, Any])
+@router.post("/ai/summary/", response_model=Dict[str, Any])
 async def ai_summary(payload: CompareRequest) -> Dict[str, Any]:
     try:
         diff = compare_code(payload.old_code, payload.new_code)

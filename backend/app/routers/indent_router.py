@@ -4,6 +4,6 @@ from ..services.indent_checker import check_indentation
 
 router = APIRouter(prefix="/indent", tags=["Indent Checker"])
 
-@router.post("/")
+@router.post("/indent")
 def indent_check(payload: CodeInput):
     return check_indentation(payload.code)
