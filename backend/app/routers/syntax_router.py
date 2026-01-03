@@ -1,9 +1,12 @@
 from fastapi import APIRouter
-from app.models.code_input_model import CodeInput
-from app.services.syntax_validator import validate_syntax
+from app.models.code_model import CodeRequest
+from app.services.syntax_engine import validate_syntax
 
-router = APIRouter(prefix="/syntax", tags=["Syntax Validator"])
+router = APIRouter(
+    prefix="/syntax",
+    tags=["Syntax"]
+)
 
-@router.post("/syntax")
-def syntax_check(payload: CodeInput):
+@router.post("/")
+def syntax(payload: CodeRequest):
     return validate_syntax(payload.code)

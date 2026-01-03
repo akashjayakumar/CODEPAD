@@ -1,9 +1,12 @@
 from fastapi import APIRouter
-from ..models.code_input_model import CodeInput
-from ..services.indent_checker import check_indentation
+from app.models.code_model import CodeRequest
+from app.services.indent_engine import check_indentation
 
-router = APIRouter(prefix="/indent", tags=["Indent Checker"])
+router = APIRouter(
+    prefix="/indent",
+    tags=["Indentation"]
+)
 
-@router.post("/indent")
-def indent_check(payload: CodeInput):
+@router.post("/")
+def indent(payload: CodeRequest):
     return check_indentation(payload.code)
